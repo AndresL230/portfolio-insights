@@ -65,10 +65,6 @@ const Navigation = ({ currentPage, onPageChange }) => {
             {item.label}
           </button>
         ))}
-        <div className="search-container">
-          <input type="text" placeholder="Search in site" className="search-input" />
-          <span className="search-icon">🔍</span>
-        </div>
       </div>
     </nav>
   );
@@ -242,8 +238,7 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
       {/* Performance Overview Table */}
       <div className="table-section">
         <div className="table-header">
-          <span className="table-icon">🔷</span>
-          <h3>Table 1: Performance Overview</h3>
+          <h3>Performance Overview</h3>
         </div>
         
         <div className="table-container">
@@ -256,6 +251,7 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
                 <th>Gain/Loss (%)</th>
                 <th>Gain/Loss ($)</th>
                 <th>Total Value</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -267,14 +263,21 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
                     <td>{holding.shares}</td>
                     <td>{formatCurrency(holding.current_price)}</td>
                     <td className={returnPercentage >= 0 ? 'positive' : 'negative'}>
-                      <span className="percentage-badge">
-                        {formatPercentage(returnPercentage)}
-                      </span>
+                      {formatPercentage(returnPercentage)}
                     </td>
                     <td className={gainLoss >= 0 ? 'positive' : 'negative'}>
                       {formatCurrency(gainLoss)}
                     </td>
-                    <td><strong>{formatCurrency(marketValue)}</strong></td>
+                    <td className="total-value">{formatCurrency(marketValue)}</td>
+                    <td>
+                      <button
+                        onClick={() => onDeleteHolding(holding.id)}
+                        className="delete-btn"
+                        title="Delete holding"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -286,8 +289,7 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
       {/* Position Details Table */}
       <div className="table-section">
         <div className="table-header">
-          <span className="table-icon">🔶</span>
-          <h3>Table 2: Position Details</h3>
+          <h3>Position Details</h3>
         </div>
         
         <div className="table-container">
@@ -310,7 +312,7 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
                   <td>{formatCurrency(holding.buy_price)}</td>
                   <td>2024-06-15</td>
                   <td>{holding.sector}</td>
-                  <td>{getNotes(holding.ticker)}</td>
+                  <td className="notes-cell">{getNotes(holding.ticker)}</td>
                 </tr>
               ))}
             </tbody>
@@ -399,7 +401,6 @@ const InsightsPage = ({ holdings, sectorData }) => (
       
       <div className="suggestions-grid">
         <div className="suggestion-item">
-          <div className="suggestion-icon">💼</div>
           <div className="suggestion-content">
             <h4>Over-Concentration in Tech Sector</h4>
             <p>Consider diversifying into other sectors</p>
@@ -411,7 +412,6 @@ const InsightsPage = ({ holdings, sectorData }) => (
         </div>
         
         <div className="suggestion-item">
-          <div className="suggestion-icon">📊</div>
           <div className="suggestion-content">
             <h4>High Volatility</h4>
             <p>Some stocks showing high risk due to market conditions</p>
@@ -455,7 +455,6 @@ const InsightsPage = ({ holdings, sectorData }) => (
       
       <div className="risk-items">
         <div className="risk-item">
-          <div className="risk-icon warning">⚠️</div>
           <div className="risk-content">
             <h4>Over-Concentration</h4>
             <p>Too much investment in one specific portfolio</p>
@@ -463,7 +462,6 @@ const InsightsPage = ({ holdings, sectorData }) => (
         </div>
         
         <div className="risk-item">
-          <div className="risk-icon danger">🚫</div>
           <div className="risk-content">
             <h4>No Dividends</h4>
             <p>Consider adding dividend-paying stocks</p>
@@ -471,7 +469,6 @@ const InsightsPage = ({ holdings, sectorData }) => (
         </div>
         
         <div className="risk-item">
-          <div className="risk-icon caution">⏳</div>
           <div className="risk-content">
             <h4>Overtrading</h4>
             <p>Excessive buy/trading activity</p>
@@ -657,9 +654,8 @@ const App = () => {
 
       <footer className="app-footer">
         <div className="footer-links">
-          <a href="#privacy">Privacy Policy</a>
-          <a href="#terms">Terms of Use</a>
-          <a href="#contact">Contact Us</a>
+          <a href='https://linkedin.com/in/andres-lopez23/' target='blank'>Created By Andres Lopez</a>
+          <a href='https://github.com/AndresL230' target='blank'>Check out my Github!</a>
         </div>
       </footer>
     </div>

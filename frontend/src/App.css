@@ -374,6 +374,7 @@ body {
 .details-table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
 }
 
 .performance-table th,
@@ -388,28 +389,64 @@ body {
 .performance-table th,
 .details-table th {
   background: #f8f9fa;
-  font-weight: 500;
-  color: #666;
-  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
 }
 
 .performance-table td,
 .details-table td {
   font-size: 0.9rem;
-  color: #333;
+  color: #495057;
+}
+
+.performance-table tr:hover,
+.details-table tr:hover {
+  background: #f8f9fa;
 }
 
 .ticker-cell {
   font-weight: 600;
-  color: #333;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.total-value {
+  font-weight: 600;
+  color: #495057;
+}
+
+.notes-cell {
+  color: #6c757d;
+  font-style: italic;
 }
 
 .positive {
   color: #28a745;
+  font-weight: 500;
 }
 
 .negative {
   color: #dc3545;
+  font-weight: 500;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.delete-btn:hover {
+  background: #c82333;
 }
 
 .percentage-badge {
@@ -565,14 +602,9 @@ body {
   border-radius: 8px;
   border: 1px solid #e9ecef;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   gap: 1rem;
   align-items: start;
-}
-
-.suggestion-icon {
-  font-size: 1.5rem;
-  padding: 0.5rem;
 }
 
 .suggestion-content h4 {
@@ -678,32 +710,7 @@ body {
   padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.risk-icon {
-  font-size: 2rem;
-  padding: 0.5rem;
-  border-radius: 50%;
-  width: 3rem;
-  height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.risk-icon.warning {
-  background: #fff3cd;
-}
-
-.risk-icon.danger {
-  background: #f8d7da;
-}
-
-.risk-icon.caution {
-  background: #e2e3e5;
+  border-left: 4px solid #dc3545;
 }
 
 .risk-content h4 {
