@@ -1,4 +1,4 @@
-# 📊 Stock Portfolio Insights
+# Stock Portfolio Insights
 
 A modern, full-stack web application for tracking and analyzing stock portfolios with real-time performance metrics, AI-powered insights, and comprehensive portfolio analytics.
 
@@ -7,30 +7,30 @@ A modern, full-stack web application for tracking and analyzing stock portfolios
 ![Flask](https://img.shields.io/badge/Backend-Flask-lightgrey)
 ![Python](https://img.shields.io/badge/Language-Python-yellow)
 
-## 🎯 **Project Overview**
+## **Project Overview**
 
 Stock Portfolio Insights is a comprehensive portfolio management system that helps investors track their holdings, analyze performance, and receive AI-powered recommendations for portfolio optimization. The application features a clean, professional interface with three main sections: Dashboard, Holdings Management, and Portfolio Insights.
 
-## ✨ **Key Features**
+## **Key Features**
 
-### 📈 **Dashboard & Analytics**
+### **Dashboard & Analytics**
 - **Portfolio Summary**: Real-time overview of total value, gains/losses, and performance metrics
 - **Visual Analytics**: Interactive charts showing portfolio value over time, sector allocation, and stock weight distribution
 - **Performance Tracking**: Comprehensive tracking of portfolio performance with historical data
 
-### 💼 **Holdings Management**
+### **Holdings Management**
 - **Performance Overview Table**: Real-time tracking of individual stock performance with gain/loss calculations
 - **Position Details Table**: Detailed information including company names, purchase dates, sectors, and investment notes
 - **Add/Remove Holdings**: Easy-to-use interface for managing portfolio positions
 - **Real-time Price Updates**: Simulated live price feeds with refresh functionality
 
-### 🤖 **AI-Powered Insights**
+### **AI-Powered Insights**
 - **AI Suggestion Panel**: Intelligent recommendations based on portfolio analysis
 - **Risk Assessment**: Identification of portfolio risks including over-concentration and volatility warnings
 - **Diversification Analysis**: Sector allocation insights and diversification recommendations
 - **Performance Insights**: Advanced metrics including total returns and average holding periods
 
-## 🏗️ **Technical Architecture**
+## **Technical Architecture**
 
 ### **Frontend (React)**
 - **React 18** with modern hooks and functional components
@@ -46,7 +46,7 @@ Stock Portfolio Insights is a comprehensive portfolio management system that hel
 - **Error handling and validation** for robust data management
 - **Modular code structure** for easy maintenance and scaling
 
-## 🚀 **Quick Start Guide**
+## **Quick Start Guide**
 
 ### **Prerequisites**
 - Python 3.7 or higher
@@ -110,7 +110,7 @@ npm start
 - **Backend API**: http://localhost:5000
 - **API Health Check**: http://localhost:5000/api/health
 
-## 📁 **Project Structure**
+## **Project Structure**
 
 ```
 stock-portfolio-insights/
@@ -129,7 +129,7 @@ stock-portfolio-insights/
         └── index.js          # React entry point
 ```
 
-## 🔌 **API Documentation**
+## **API Documentation**
 
 ### **Base URL**: `http://localhost:5000/api`
 
@@ -174,7 +174,7 @@ POST /api/holdings
 }
 ```
 
-## 🎨 **User Interface**
+## **User Interface**
 
 ### **Navigation**
 - **Home**: Portfolio dashboard with summary and visual analytics
@@ -199,7 +199,7 @@ POST /api/holdings
 - Performance insights with key metrics
 - Risk flags and warnings for portfolio optimization
 
-## 📊 **Data Management**
+## **Data Management**
 
 ### **Current Implementation**
 The application currently uses **simulated stock data** for demonstration purposes:
@@ -227,7 +227,7 @@ def get_real_stock_price(symbol):
     return float(data['Global Quote']['05. price'])
 ```
 
-## 🛡️ **Error Handling & Validation**
+## **Error Handling & Validation**
 
 ### **Backend Validation**
 - Input sanitization for all API endpoints
@@ -241,14 +241,14 @@ def get_real_stock_price(symbol):
 - Loading states for async operations
 - Graceful fallbacks for API failures
 
-## 📱 **Responsive Design**
+## **Responsive Design**
 
 The application is fully responsive with breakpoints for:
 - **Desktop**: Full layout with sidebar navigation
 - **Tablet**: Stacked layout with touch-friendly interfaces
 - **Mobile**: Single-column layout with optimized forms
 
-## 🔒 **Security Considerations**
+## **Security Considerations**
 
 ### **Current Implementation**
 - CORS configuration for secure API access
@@ -261,7 +261,7 @@ The application is fully responsive with breakpoints for:
 - Use environment variables for sensitive configuration
 - Implement API key management for external services
 
-## 🚀 **Deployment Options**
+## **Deployment Options**
 
 ### **Frontend Deployment**
 - **Vercel**: Automatic deployments with GitHub integration
@@ -278,7 +278,7 @@ The application is fully responsive with breakpoints for:
 - **Google Cloud Run**: Containerized application deployment
 - **AWS Elastic Beanstalk**: Managed application platform
 
-## 🔄 **Future Enhancements**
+## **Future Enhancements**
 
 ### **Near-term Improvements**
 - [ ] User authentication and personalized portfolios
@@ -294,7 +294,7 @@ The application is fully responsive with breakpoints for:
 - [ ] Mobile app development (React Native)
 - [ ] Integration with brokerage APIs for automatic sync
 
-## 🐛 **Troubleshooting**
+## **Troubleshooting**
 
 ### **Common Issues**
 
