@@ -42,23 +42,28 @@ export const PortfolioLineChart = ({ data, title = "Portfolio Value Over Time" }
           <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
           <XAxis
             dataKey="formatted_date"
-            stroke="#00FFFF"
+            stroke="#666666"
+            tick={{ fill: '#CCCCCC' }}
             style={{ fontSize: '12px' }}
           />
           <YAxis
-            stroke="#00FFFF"
+            stroke="#666666"
+            tick={{ fill: '#CCCCCC' }}
             style={{ fontSize: '12px' }}
             tickFormatter={(value) => `$${value.toLocaleString()}`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1a1a1a',
+              backgroundColor: 'rgba(10, 10, 10, 0.95)',
               border: '1px solid #00FFFF',
-              borderRadius: '4px',
-              color: '#00FFFF'
+              borderRadius: '8px',
+              color: '#FFFFFF',
+              padding: '12px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
             }}
             formatter={(value) => [`$${value.toLocaleString()}`, 'Value']}
-            labelStyle={{ fontWeight: 'bold', color: '#00FFFF' }}
+            labelStyle={{ fontWeight: 'bold', color: '#FFFFFF', marginBottom: '4px' }}
+            itemStyle={{ color: '#00FFFF' }}
           />
           <Area
             type="monotone"
@@ -134,10 +139,15 @@ export const SectorPieChart = ({ data, title = "Sector Allocation" }) => {
               props.payload.sector
             ]}
             contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #ccc',
-              borderRadius: '4px'
+              backgroundColor: 'rgba(10, 10, 10, 0.95)',
+              border: '1px solid #FF00FF',
+              borderRadius: '8px',
+              color: '#FFFFFF',
+              padding: '12px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
             }}
+            labelStyle={{ fontWeight: 'bold', color: '#FFFFFF' }}
+            itemStyle={{ color: '#FF00FF' }}
           />
           <Legend
             verticalAlign="bottom"
@@ -177,20 +187,24 @@ export const HoldingsBarChart = ({ data, title = "Holdings by Value" }) => {
           <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
           <XAxis
             dataKey="ticker"
-            stroke="#00FF00"
+            stroke="#666666"
+            tick={{ fill: '#CCCCCC' }}
             style={{ fontSize: '12px' }}
           />
           <YAxis
-            stroke="#00FF00"
+            stroke="#666666"
+            tick={{ fill: '#CCCCCC' }}
             style={{ fontSize: '12px' }}
             tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1a1a1a',
+              backgroundColor: 'rgba(10, 10, 10, 0.95)',
               border: '1px solid #00FF00',
-              borderRadius: '4px',
-              color: '#00FF00'
+              borderRadius: '8px',
+              color: '#FFFFFF',
+              padding: '12px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
             }}
             formatter={(value, name, props) => {
               if (name === 'value') {
@@ -198,7 +212,8 @@ export const HoldingsBarChart = ({ data, title = "Holdings by Value" }) => {
               }
               return [value, name];
             }}
-            labelStyle={{ fontWeight: 'bold', color: '#00FF00' }}
+            labelStyle={{ fontWeight: 'bold', color: '#FFFFFF' }}
+            itemStyle={{ color: '#00FF00' }}
           />
           <Legend />
           <Bar
@@ -303,20 +318,24 @@ export const PerformanceBarChart = ({ data, title = "Stock Performance" }) => {
           <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
           <XAxis
             dataKey="ticker"
-            stroke="#FF00FF"
+            stroke="#666666"
+            tick={{ fill: '#CCCCCC' }}
             style={{ fontSize: '12px' }}
           />
           <YAxis
-            stroke="#FF00FF"
+            stroke="#666666"
+            tick={{ fill: '#CCCCCC' }}
             style={{ fontSize: '12px' }}
             tickFormatter={(value) => `${value}%`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1a1a1a',
+              backgroundColor: 'rgba(10, 10, 10, 0.95)',
               border: '1px solid #FF00FF',
-              borderRadius: '4px',
-              color: '#FF00FF'
+              borderRadius: '8px',
+              color: '#FFFFFF',
+              padding: '12px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
             }}
             formatter={(value, name) => {
               if (name === 'return') {
@@ -324,7 +343,8 @@ export const PerformanceBarChart = ({ data, title = "Stock Performance" }) => {
               }
               return [value, name];
             }}
-            labelStyle={{ fontWeight: 'bold', color: '#FF00FF' }}
+            labelStyle={{ fontWeight: 'bold', color: '#FFFFFF' }}
+            itemStyle={{ color: '#FF00FF' }}
           />
           <Legend />
           <Bar

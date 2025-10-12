@@ -81,8 +81,8 @@ body {
 }
 
 .card:hover {
-  background: rgba(25, 25, 35, 0.6);
-  border-color: var(--color-border-medium);
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-light);
 }
 
 .section-title {
@@ -338,9 +338,9 @@ body {
 }
 
 .summary-item:hover {
-  background: rgba(25, 25, 35, 0.7);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+  background: rgba(20, 20, 30, 0.6);
+  border-color: rgba(255, 255, 255, 0.05);
+  transform: none;
 }
 
 .summary-label {
@@ -415,8 +415,8 @@ body {
 }
 
 .chart-container:hover {
-  background: rgba(25, 25, 35, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(20, 20, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .chart-container h4 {
@@ -559,7 +559,7 @@ body {
 
 .performance-table tr:hover,
 .details-table tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
 }
 
 /* Utility Typography */
@@ -805,8 +805,8 @@ body {
 }
 
 .suggestion-item:hover {
-  background: rgba(25, 25, 35, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(20, 20, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .suggestion-content h4 {
@@ -865,8 +865,8 @@ body {
 }
 
 .insight-item:hover {
-  background: rgba(25, 25, 35, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(20, 20, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .insight-label {
@@ -942,8 +942,8 @@ body {
 }
 
 .risk-item:hover {
-  background: rgba(25, 25, 35, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(20, 20, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .risk-content h4 {
