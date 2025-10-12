@@ -4,6 +4,8 @@ import json
 import random
 import datetime
 from typing import Dict, List
+import yfinance as yf
+from datetime import timedelta
 
 
 
@@ -19,6 +21,7 @@ portfolio_data = {
             "shares": 10,
             "buy_price": 150.00,
             "current_price": 185.20,
+            "purchase_date": "2024-06-15",
             "sector": "Technology"
         },
         {
@@ -27,6 +30,7 @@ portfolio_data = {
             "shares": 5,
             "buy_price": 2400.00,
             "current_price": 2650.30,
+            "purchase_date": "2024-05-20",
             "sector": "Technology"
         },
         {
@@ -35,6 +39,7 @@ portfolio_data = {
             "shares": 8,
             "buy_price": 200.00,
             "current_price": 245.80,
+            "purchase_date": "2024-07-10",
             "sector": "Consumer Cyclical"
         },
         {
@@ -43,6 +48,7 @@ portfolio_data = {
             "shares": 12,
             "buy_price": 300.00,
             "current_price": 380.50,
+            "purchase_date": "2024-04-01",
             "sector": "Technology"
         },
         {
@@ -51,6 +57,7 @@ portfolio_data = {
             "shares": 6,
             "buy_price": 400.00,
             "current_price": 875.20,
+            "purchase_date": "2024-03-15",
             "sector": "Technology"
         }
     ]
@@ -76,6 +83,88 @@ SECTOR_MAP = {
     'ORCL': 'Technology'
 }
 
+def get_real_time_price(ticker):
+    """Fetch real-time price from Yahoo Finance"""
+    try:
+        stock = yf.Ticker(ticker)
+        data = stock.info
+        current_price = data.get('currentPrice') or data.get('regularMarketPrice')
+        if current_price:
+            return round(float(current_price), 2)
+        # Fallback to recent history if info not available
+        hist = stock.history(period='1d')
+        if not hist.empty:
+            return round(float(hist['Close'].iloc[-1]), 2)
+        return None
+    except Exception as e:
+        print(f"Error fetching price for {ticker}: {e}")
+        return None
+
+def get_historical_price(ticker, date_str):
+    """Fetch historical price for a specific date from Yahoo Finance"""
+    try:
+        stock = yf.Ticker(ticker)
+
+        # Parse the date string (format: YYYY-MM-DD)
+        target_date = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+
+        # Fetch data for a range around the target date
+        # Go back a few days in case the exact date is a weekend/holiday
+        start_date = target_date - timedelta(days=7)
+        end_date = target_date + timedelta(days=1)
+
+        hist = stock.history(start=start_date, end=end_date)
+
+        if hist.empty:
+            print(f"No historical data found for {ticker} around {date_str}")
+            return None
+
+        # Try to find the exact date first
+        target_date_str = target_date.strftime('%Y-%m-%d')
+        for index, row in hist.iterrows():
+            if index.strftime('%Y-%m-%d') == target_date_str:
+                return round(float(row['Close']), 2)
+
+        # If exact date not found, use the closest previous date
+        # (stock price on last trading day before purchase)
+        hist_before = hist[hist.index <= target_date]
+        if not hist_before.empty:
+            closest_price = hist_before.iloc[-1]['Close']
+            return round(float(closest_price), 2)
+
+        # If no data before, use the closest date after
+        if not hist.empty:
+            closest_price = hist.iloc[0]['Close']
+            return round(float(closest_price), 2)
+
+        return None
+    except Exception as e:
+        print(f"Error fetching historical price for {ticker} on {date_str}: {e}")
+        return None
+
+def get_stock_history(ticker, period='1mo'):
+    """Fetch historical stock data"""
+    try:
+        stock = yf.Ticker(ticker)
+        hist = stock.history(period=period)
+
+        history_data = []
+        for index, row in hist.iterrows():
+            history_data.append({
+                'date': index.strftime('%Y-%m-%d'),
+                'formatted_date': index.strftime('%b %d'),
+                'price': round(float(row['Close']), 2),
+                'open': round(float(row['Open']), 2),
+                'high': round(float(row['High']), 2),
+                'low': round(float(row['Low']), 2),
+                'volume': int(row['Volume'])
+            })
+
+        return history_data
+    except Exception as e:
+        print(f"Error fetching history for {ticker}: {e}")
+        return []
+
 def calculate_portfolio_metrics():
     """Calculate portfolio summary metrics"""
     holdings = portfolio_data['holdings']
@@ -83,7 +172,7 @@ def calculate_portfolio_metrics():
     total_cost = sum(h['shares'] * h['buy_price'] for h in holdings)
     total_gain_loss = total_value - total_cost
     gain_loss_percentage = (total_gain_loss / total_cost * 100) if total_cost > 0 else 0
-    
+
     return {
         'total_value': round(total_value, 2),
         'total_cost': round(total_cost, 2),
@@ -115,33 +204,46 @@ def add_holding():
     """Add a new stock holding"""
     try:
         data = request.get_json()
-        
+
         # Validate input
-        required_fields = ['ticker', 'shares', 'buy_price']
+        required_fields = ['ticker', 'shares', 'purchase_date']
         if not all(field in data for field in required_fields):
-            return jsonify({'error': 'Missing required fields: ticker, shares, buy_price'}), 400
-        
+            return jsonify({'error': 'Missing required fields: ticker, shares, purchase_date'}), 400
+
         ticker = data['ticker'].upper().strip()
         shares = float(data['shares'])
-        buy_price = float(data['buy_price'])
-        
+        purchase_date = data['purchase_date']
+
         # Validation
         if not ticker:
             return jsonify({'error': 'Ticker symbol cannot be empty'}), 400
         if shares <= 0:
             return jsonify({'error': 'Number of shares must be positive'}), 400
-        if buy_price <= 0:
-            return jsonify({'error': 'Buy price must be positive'}), 400
-        
+        if not purchase_date:
+            return jsonify({'error': 'Purchase date is required'}), 400
+
+        # Validate date format
+        try:
+            datetime.datetime.strptime(purchase_date, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+
         # Check for duplicate ticker
         existing_tickers = [h['ticker'] for h in portfolio_data['holdings']]
         if ticker in existing_tickers:
             return jsonify({'error': f'Stock {ticker} already exists in portfolio'}), 400
-        
-        # Simulate current price (in production, fetch from real API like Alpha Vantage)
-        price_variation = 0.85 + random.random() * 0.3  # ±15% from buy price
-        current_price = round(buy_price * price_variation, 2)
-        
+
+        # Fetch historical price for the purchase date
+        buy_price = get_historical_price(ticker, purchase_date)
+        if buy_price is None:
+            return jsonify({'error': f'Could not fetch historical price for {ticker} on {purchase_date}. Please verify the ticker symbol and date.'}), 400
+
+        # Fetch current price
+        current_price = get_real_time_price(ticker)
+        if current_price is None:
+            # Fallback to buy price if current price fetch fails
+            current_price = buy_price
+
         # Create new holding
         new_holding = {
             'id': max([h['id'] for h in portfolio_data['holdings']], default=0) + 1,
@@ -149,18 +251,19 @@ def add_holding():
             'shares': shares,
             'buy_price': buy_price,
             'current_price': current_price,
+            'purchase_date': purchase_date,
             'sector': SECTOR_MAP.get(ticker, 'Other')
         }
-        
+
         portfolio_data['holdings'].append(new_holding)
-        
+
         return jsonify({
-            'message': f'Successfully added {ticker} to portfolio',
+            'message': f'Successfully added {ticker} to portfolio (bought at ${buy_price} on {purchase_date})',
             'holding': new_holding
         }), 201
-        
+
     except ValueError as e:
-        return jsonify({'error': 'Invalid number format for shares or buy_price'}), 400
+        return jsonify({'error': 'Invalid number format for shares'}), 400
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
@@ -181,21 +284,70 @@ def delete_holding(holding_id):
 
 @app.route('/api/refresh-prices', methods=['POST'])
 def refresh_prices():
-    """Simulate refreshing stock prices (in production, call real API)"""
+    """Fetch real-time prices from Yahoo Finance and update holdings"""
     try:
+        updated_count = 0
         for holding in portfolio_data['holdings']:
-            # Simulate realistic price movement (±2-5%)
-            variation = 0.95 + random.random() * 0.1
-            holding['current_price'] = round(holding['current_price'] * variation, 2)
-        
+            ticker = holding['ticker']
+            real_price = get_real_time_price(ticker)
+
+            if real_price:
+                holding['current_price'] = real_price
+                updated_count += 1
+            else:
+                # Fallback to simulated price movement if API fails
+                variation = 0.95 + random.random() * 0.1
+                holding['current_price'] = round(holding['current_price'] * variation, 2)
+
         metrics = calculate_portfolio_metrics()
-        
+
         return jsonify({
-            'message': 'Prices refreshed successfully',
+            'message': f'Prices refreshed successfully ({updated_count}/{len(portfolio_data["holdings"])} from live data)',
             'holdings': portfolio_data['holdings'],
             'metrics': metrics
         }), 200
-        
+
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+@app.route('/api/stock-history/<ticker>', methods=['GET'])
+def get_stock_history_endpoint(ticker):
+    """Get historical price data for a specific stock"""
+    try:
+        period = request.args.get('period', '1mo')  # 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
+        ticker = ticker.upper()
+
+        history = get_stock_history(ticker, period)
+
+        if not history:
+            return jsonify({'error': f'Unable to fetch history for {ticker}'}), 404
+
+        return jsonify({
+            'ticker': ticker,
+            'period': period,
+            'history': history
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+@app.route('/api/real-time-prices', methods=['GET'])
+def get_all_real_time_prices():
+    """Get real-time prices for all holdings"""
+    try:
+        prices = {}
+        for holding in portfolio_data['holdings']:
+            ticker = holding['ticker']
+            price = get_real_time_price(ticker)
+            if price:
+                prices[ticker] = {
+                    'price': price,
+                    'change': round(price - holding['current_price'], 2),
+                    'change_percent': round(((price - holding['current_price']) / holding['current_price']) * 100, 2) if holding['current_price'] > 0 else 0
+                }
+
+        return jsonify(prices), 200
+
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 

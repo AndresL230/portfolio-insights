@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
+import {
+  PortfolioLineChart,
+  SectorPieChart,
+  HoldingsBarChart,
+  PerformanceBarChart,
+  StockHistoryChart
+} from './components/Charts';
 
 // API Base URL
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -125,8 +132,8 @@ const BarChart = ({ data, title }) => (
   </div>
 );
 
-// Home Page Component with your requested updates
-const HomePage = ({ metrics, onGetStarted }) => (
+// Home Page Component with interactive charts
+const HomePage = ({ metrics, onGetStarted, portfolioHistory, sectorData, holdings }) => (
   <div className="page-content">
     <div className="welcome-section">
       <h1>Welcome to Your Stock Portfolio</h1>
@@ -139,17 +146,21 @@ const HomePage = ({ metrics, onGetStarted }) => (
     <div className="portfolio-summary-section">
       <h2>Portfolio Summary</h2>
       <p>Overview of your portfolio performance</p>
-      
+
       <div className="summary-grid">
         <div className="summary-item">
           <div className="summary-label">Total Portfolio Value</div>
-          <div className="summary-value">${metrics.total_value?.toLocaleString() || '25,000'}</div>
-          <div className="summary-change">+$1,500</div>
+          <div className="summary-value">${metrics.total_value?.toLocaleString() || '0'}</div>
+          <div className={`summary-change ${metrics.gain_loss_percentage >= 0 ? 'positive' : 'negative'}`}>
+            {metrics.gain_loss_percentage >= 0 ? '+' : ''}{metrics.gain_loss_percentage?.toFixed(2) || '0'}%
+          </div>
         </div>
         <div className="summary-item">
           <div className="summary-label">Total Gain/Loss</div>
-          <div className="summary-value">${metrics.total_gain_loss?.toLocaleString() || '2,500'}</div>
-          <div className="summary-change">+12%</div>
+          <div className="summary-value">${metrics.total_gain_loss?.toLocaleString() || '0'}</div>
+          <div className={`summary-change ${metrics.gain_loss_percentage >= 0 ? 'positive' : 'negative'}`}>
+            {metrics.gain_loss_percentage >= 0 ? '+' : ''}{metrics.gain_loss_percentage?.toFixed(2) || '0'}%
+          </div>
         </div>
         <div className="summary-item">
           <div className="summary-label">Best Performer</div>
@@ -167,11 +178,11 @@ const HomePage = ({ metrics, onGetStarted }) => (
     <div className="portfolio-visuals-section">
       <h2>Portfolio Visuals</h2>
       <p>Visual representation of portfolio performance</p>
-      
+
       <div className="charts-grid">
-        <LineChart />
-        <PieChart />
-        <BarChart title="Stock Weight by Ticker" />
+        <PortfolioLineChart data={portfolioHistory} />
+        <SectorPieChart data={sectorData} />
+        <HoldingsBarChart data={holdings} />
       </div>
     </div>
   </div>
@@ -183,7 +194,6 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
   const [formData, setFormData] = useState({
     ticker: '',
     shares: '',
-    buy_price: '',
     purchase_date: ''
   });
 
@@ -213,9 +223,9 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
       await onAddStock({
         ticker: formData.ticker.trim().toUpperCase(),
         shares: parseFloat(formData.shares),
-        buy_price: parseFloat(formData.buy_price)
+        purchase_date: formData.purchase_date
       });
-      setFormData({ ticker: '', shares: '', buy_price: '', purchase_date: '' });
+      setFormData({ ticker: '', shares: '', purchase_date: '' });
       setShowAddForm(false);
     } catch (error) {
       console.error('Error adding stock:', error);
@@ -310,7 +320,7 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
                   <td className="ticker-cell">{holding.ticker}</td>
                   <td>{getCompanyName(holding.ticker)}</td>
                   <td>{formatCurrency(holding.buy_price)}</td>
-                  <td>2024-06-15</td>
+                  <td>{holding.purchase_date || 'N/A'}</td>
                   <td>{holding.sector}</td>
                   <td className="notes-cell">{getNotes(holding.ticker)}</td>
                 </tr>
@@ -341,32 +351,24 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, onRefreshPrices, 
                   <label>Number of Shares</label>
                   <input
                     type="number"
-                    placeholder="Enter Number of Shares"
+                    step="0.001"
+                    placeholder="Enter Number of Shares (e.g., 10.5)"
                     value={formData.shares}
                     onChange={(e) => setFormData({...formData, shares: e.target.value})}
                     required
+                    min="0.001"
                   />
-                </div>
-                <div className="form-group">
-                  <label>Buy Price</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Enter Buy Price"
-                    value={formData.buy_price}
-                    onChange={(e) => setFormData({...formData, buy_price: e.target.value})}
-                    required
-                  />
+                  <small>Decimal values allowed</small>
                 </div>
                 <div className="form-group">
                   <label>Purchase Date</label>
                   <input
-                    type="text"
-                    placeholder="MM/DD/YYYY"
+                    type="date"
                     value={formData.purchase_date}
                     onChange={(e) => setFormData({...formData, purchase_date: e.target.value})}
+                    required
                   />
-                  <small>Select Date</small>
+                  <small>Price will be fetched automatically</small>
                 </div>
               </div>
               <div className="form-actions">
@@ -510,12 +512,25 @@ const App = () => {
   const [holdings, setHoldings] = useState([]);
   const [metrics, setMetrics] = useState({});
   const [sectorData, setSectorData] = useState([]);
+  const [portfolioHistory, setPortfolioHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Load initial data
   useEffect(() => {
     loadPortfolioData();
     loadSectorData();
+    loadPortfolioHistory();
+  }, []);
+
+  // Set up real-time price polling (every 60 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Silent refresh - don't show loading state
+      refreshPricesQuietly();
+    }, 60000); // 60 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   // Updated loadPortfolioData function as requested
@@ -550,6 +565,28 @@ const App = () => {
       setSectorData(data);
     } catch (err) {
       console.error('Error loading sector data:', err);
+    }
+  };
+
+  const loadPortfolioHistory = async () => {
+    try {
+      const data = await api.get('/portfolio-history?days=30');
+      setPortfolioHistory(data);
+    } catch (err) {
+      console.error('Error loading portfolio history:', err);
+    }
+  };
+
+  // Silent refresh for real-time polling (doesn't show loading state)
+  const refreshPricesQuietly = async () => {
+    try {
+      const data = await api.post('/refresh-prices', {});
+      setHoldings(data.holdings || []);
+      setMetrics(prev => ({ ...prev, ...data.metrics }));
+      await loadSectorData();
+      await loadPortfolioHistory();
+    } catch (err) {
+      console.error('Background price refresh failed:', err);
     }
   };
 
@@ -603,9 +640,12 @@ const App = () => {
     switch (currentPage) {
       case 'home':
         return (
-          <HomePage 
-            metrics={metrics} 
+          <HomePage
+            metrics={metrics}
             onGetStarted={() => setCurrentPage('portfolio')}
+            portfolioHistory={portfolioHistory}
+            sectorData={sectorData}
+            holdings={holdings}
           />
         );
       case 'portfolio':
@@ -620,7 +660,7 @@ const App = () => {
         );
       case 'insights':
         return (
-          <InsightsPage 
+          <InsightsPage
             holdings={holdings}
             sectorData={sectorData}
           />
@@ -633,7 +673,15 @@ const App = () => {
           </div>
         );
       default:
-        return <HomePage metrics={metrics} onGetStarted={() => setCurrentPage('portfolio')} />;
+        return (
+          <HomePage
+            metrics={metrics}
+            onGetStarted={() => setCurrentPage('portfolio')}
+            portfolioHistory={portfolioHistory}
+            sectorData={sectorData}
+            holdings={holdings}
+          />
+        );
     }
   };
 
