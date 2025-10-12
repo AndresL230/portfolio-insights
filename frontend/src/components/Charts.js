@@ -35,37 +35,38 @@ export const PortfolioLineChart = ({ data, title = "Portfolio Value Over Time" }
         <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+              <stop offset="5%" stopColor="#00FFFF" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#00FFFF" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
           <XAxis
             dataKey="formatted_date"
-            stroke="#666"
+            stroke="#00FFFF"
             style={{ fontSize: '12px' }}
           />
           <YAxis
-            stroke="#666"
+            stroke="#00FFFF"
             style={{ fontSize: '12px' }}
             tickFormatter={(value) => `$${value.toLocaleString()}`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #ccc',
-              borderRadius: '4px'
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #00FFFF',
+              borderRadius: '4px',
+              color: '#00FFFF'
             }}
             formatter={(value) => [`$${value.toLocaleString()}`, 'Value']}
-            labelStyle={{ fontWeight: 'bold' }}
+            labelStyle={{ fontWeight: 'bold', color: '#00FFFF' }}
           />
           <Area
             type="monotone"
             dataKey="value"
-            stroke="#3B82F6"
+            stroke="#00FFFF"
             fillOpacity={1}
             fill="url(#colorValue)"
-            strokeWidth={2}
+            strokeWidth={3}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -84,7 +85,7 @@ export const SectorPieChart = ({ data, title = "Sector Allocation" }) => {
     );
   }
 
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#F97316'];
+  const COLORS = ['#00FFFF', '#FF00FF', '#00FF00', '#FFFF00', '#FF0099', '#00FFAA', '#FF6600'];
 
   const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
@@ -173,22 +174,23 @@ export const HoldingsBarChart = ({ data, title = "Holdings by Value" }) => {
       <h4>{title}</h4>
       <ResponsiveContainer width="100%" height={300}>
         <RechartsBarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
           <XAxis
             dataKey="ticker"
-            stroke="#666"
+            stroke="#00FF00"
             style={{ fontSize: '12px' }}
           />
           <YAxis
-            stroke="#666"
+            stroke="#00FF00"
             style={{ fontSize: '12px' }}
             tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #ccc',
-              borderRadius: '4px'
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #00FF00',
+              borderRadius: '4px',
+              color: '#00FF00'
             }}
             formatter={(value, name, props) => {
               if (name === 'value') {
@@ -196,12 +198,12 @@ export const HoldingsBarChart = ({ data, title = "Holdings by Value" }) => {
               }
               return [value, name];
             }}
-            labelStyle={{ fontWeight: 'bold' }}
+            labelStyle={{ fontWeight: 'bold', color: '#00FF00' }}
           />
           <Legend />
           <Bar
             dataKey="value"
-            fill="#3B82F6"
+            fill="#00FF00"
             radius={[8, 8, 0, 0]}
             name="Total Value"
           />
@@ -298,22 +300,23 @@ export const PerformanceBarChart = ({ data, title = "Stock Performance" }) => {
       <h4>{title}</h4>
       <ResponsiveContainer width="100%" height={300}>
         <RechartsBarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
           <XAxis
             dataKey="ticker"
-            stroke="#666"
+            stroke="#FF00FF"
             style={{ fontSize: '12px' }}
           />
           <YAxis
-            stroke="#666"
+            stroke="#FF00FF"
             style={{ fontSize: '12px' }}
             tickFormatter={(value) => `${value}%`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #ccc',
-              borderRadius: '4px'
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #FF00FF',
+              borderRadius: '4px',
+              color: '#FF00FF'
             }}
             formatter={(value, name) => {
               if (name === 'return') {
@@ -321,17 +324,17 @@ export const PerformanceBarChart = ({ data, title = "Stock Performance" }) => {
               }
               return [value, name];
             }}
-            labelStyle={{ fontWeight: 'bold' }}
+            labelStyle={{ fontWeight: 'bold', color: '#FF00FF' }}
           />
           <Legend />
           <Bar
             dataKey="return"
-            fill="#10B981"
+            fill="#00FF00"
             radius={[8, 8, 0, 0]}
             name="Return %"
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.return >= 0 ? '#10B981' : '#EF4444'} />
+              <Cell key={`cell-${index}`} fill={entry.return >= 0 ? '#00FF00' : '#FF0099'} />
             ))}
           </Bar>
         </RechartsBarChart>
