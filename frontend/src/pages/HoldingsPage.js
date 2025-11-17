@@ -15,9 +15,25 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, isLoading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
+
+    // Basic validation
+    const ticker = formData.ticker.trim().toUpperCase();
+    if (!ticker) {
+      setFormError('Please enter a ticker symbol');
+      return;
+    }
+    if (ticker.length > 5) {
+      setFormError('Ticker symbols are typically 1-5 characters');
+      return;
+    }
+    if (!/^[A-Z]+$/.test(ticker)) {
+      setFormError('Ticker symbols should only contain letters');
+      return;
+    }
+
     try {
       await onAddStock({
-        ticker: formData.ticker.trim().toUpperCase(),
+        ticker: ticker,
         shares: parseFloat(formData.shares),
         purchase_date: formData.purchase_date
       });

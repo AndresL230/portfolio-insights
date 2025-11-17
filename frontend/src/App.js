@@ -16,20 +16,11 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Load initial data
+  // Load initial data only on mount
   useEffect(() => {
     loadPortfolioData();
     loadSectorData();
     loadPortfolioHistory();
-  }, []);
-
-  // Set up real-time price polling (every 60 seconds)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshPricesQuietly();
-    }, 60000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const loadPortfolioData = async () => {
@@ -69,18 +60,6 @@ const App = () => {
       setPortfolioHistory(data);
     } catch (err) {
       console.error('Error loading portfolio history:', err);
-    }
-  };
-
-  const refreshPricesQuietly = async () => {
-    try {
-      const data = await api.refreshPrices();
-      setHoldings(data.holdings || []);
-      setMetrics(prev => ({ ...prev, ...data.metrics }));
-      await loadSectorData();
-      await loadPortfolioHistory();
-    } catch (err) {
-      console.error('Background price refresh failed:', err);
     }
   };
 

@@ -97,13 +97,21 @@ def add_holding():
             print(f"Using manual buy price: ${buy_price}")
         else:
             print(f"Fetching historical price for {ticker} on {purchase_date}...")
+
+            # First try to get current price to validate ticker
+            current_validation_price = stock_service.get_real_time_price(ticker)
+            if current_validation_price is None:
+                error_msg = f'Invalid ticker symbol "{ticker}". Please verify the ticker symbol is correct. Common examples: AAPL (Apple), GOOGL (Google), MSFT (Microsoft), TSLA (Tesla).'
+                print(f"Ticker validation error: {error_msg}")
+                return jsonify({'error': error_msg}), 400
+
             buy_price = stock_service.get_historical_price(ticker, purchase_date)
             if buy_price is None:
-                error_msg = f'Could not fetch historical price for {ticker} on {purchase_date}. This could be due to: (1) Invalid ticker symbol, (2) No data available for that date, (3) Yahoo Finance rate limiting. Please wait 60 seconds and try again, or contact support.'
+                error_msg = f'Could not fetch historical price for {ticker} on {purchase_date}. The ticker appears valid but data is not available for that date. Please try: (1) A different date, (2) Wait 60 seconds if rate limited, (3) Enter the price manually.'
                 print(f"Price fetch error: {error_msg}")
                 return jsonify({
                     'error': error_msg,
-                    'suggestion': f'You can look up the historical price for {ticker} on {purchase_date} manually and provide it in the request.'
+                    'suggestion': f'Try a more recent date or enter the historical price manually.'
                 }), 400
             print(f"Successfully fetched buy price: ${buy_price}")
 
