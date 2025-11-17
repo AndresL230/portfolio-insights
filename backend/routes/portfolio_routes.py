@@ -451,3 +451,66 @@ def ai_chat():
         import traceback
         traceback.print_exc()
         return jsonify({'error': error_msg}), 500
+
+
+@portfolio_bp.route('/ai-suggestions', methods=['GET'])
+def get_ai_suggestions():
+    """Get AI-generated portfolio suggestions"""
+    try:
+        print("AI Suggestions endpoint called")
+
+        if not ai_service.is_configured():
+            error_msg = 'Gemini API key not configured. Using fallback suggestions.'
+            print(f"AI service not configured: {error_msg}")
+            # Return fallback suggestions instead of error
+            return jsonify({
+                'suggestions': ai_service._get_fallback_suggestions()
+            }), 200
+
+        holdings = portfolio_model.load_holdings()
+        metrics = portfolio_model.calculate_metrics(holdings)
+        print(f"Portfolio loaded: {len(holdings)} holdings")
+
+        # Prepare context for AI
+        portfolio_context = {
+            'total_holdings': len(holdings),
+            'total_value': metrics['total_value'],
+            'total_gain_loss': metrics['total_gain_loss'],
+            'gain_loss_percentage': metrics['gain_loss_percentage'],
+            'holdings': []
+        }
+
+        for holding in holdings:
+            market_value = holding['shares'] * holding['current_price']
+            cost = holding['shares'] * holding['buy_price']
+            gain_loss = market_value - cost
+            return_pct = (gain_loss / cost * 100) if cost > 0 else 0
+
+            portfolio_context['holdings'].append({
+                'ticker': holding['ticker'],
+                'sector': holding['sector'],
+                'shares': holding['shares'],
+                'buy_price': holding['buy_price'],
+                'current_price': holding['current_price'],
+                'market_value': market_value,
+                'return_percentage': return_pct,
+                'purchase_date': holding['purchase_date']
+            })
+
+        print("Generating AI suggestions...")
+        suggestions = ai_service.generate_suggestions(portfolio_context)
+        print(f"Generated {len(suggestions)} suggestions")
+
+        return jsonify({
+            'suggestions': suggestions
+        }), 200
+
+    except Exception as e:
+        error_msg = f'Failed to generate suggestions: {str(e)}'
+        print(f"Exception in ai_suggestions: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        # Return fallback suggestions on error
+        return jsonify({
+            'suggestions': ai_service._get_fallback_suggestions()
+        }), 200

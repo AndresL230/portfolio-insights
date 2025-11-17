@@ -130,6 +130,92 @@ Provide your answer now:"""
 
         return prompt
 
+    def generate_suggestions(self, portfolio_context: Dict) -> List[Dict]:
+        """Generate 3 structured suggestions for the portfolio"""
+        if not self.is_configured():
+            raise ValueError("Gemini API key not configured")
+
+        try:
+            portfolio_json = self._format_portfolio_json(portfolio_context)
+
+            prompt = f"""You are an AI Portfolio Advisor. Analyze the portfolio below and generate exactly 3 specific, actionable suggestions.
+
+PORTFOLIO DATA (JSON):
+{portfolio_json}
+
+Generate 3 suggestions covering these areas:
+1. Diversification/Risk - Focus on sector concentration or allocation issues
+2. Performance - Focus on underperforming stocks or optimization opportunities
+3. Strategy - Focus on long-term improvements or rebalancing
+
+CRITICAL: Return ONLY valid JSON in this exact format with no additional text:
+{{
+  "suggestions": [
+    {{
+      "title": "Brief title (max 6 words)",
+      "description": "One sentence description",
+      "recommendation": "Specific actionable recommendation (2-3 sentences)"
+    }},
+    {{
+      "title": "Brief title (max 6 words)",
+      "description": "One sentence description",
+      "recommendation": "Specific actionable recommendation (2-3 sentences)"
+    }},
+    {{
+      "title": "Brief title (max 6 words)",
+      "description": "One sentence description",
+      "recommendation": "Specific actionable recommendation (2-3 sentences)"
+    }}
+  ]
+}}
+
+Remember: Return ONLY the JSON object, no markdown formatting, no extra text."""
+
+            print("Generating portfolio suggestions...")
+            response = self.client.generate_content(prompt)
+            response_text = response.text.strip()
+
+            # Remove markdown code blocks if present
+            if response_text.startswith('```'):
+                response_text = response_text.split('```')[1]
+                if response_text.startswith('json'):
+                    response_text = response_text[4:].strip()
+
+            print(f"AI response: {response_text[:100]}...")
+
+            import json
+            suggestions_data = json.loads(response_text)
+            return suggestions_data.get('suggestions', [])
+
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
+            print(f"Response text: {response_text}")
+            # Return fallback suggestions
+            return self._get_fallback_suggestions()
+        except Exception as e:
+            print(f"Error generating suggestions: {e}")
+            return self._get_fallback_suggestions()
+
+    def _get_fallback_suggestions(self) -> List[Dict]:
+        """Return fallback suggestions if AI fails"""
+        return [
+            {
+                "title": "Review Portfolio Diversification",
+                "description": "Analyze your sector allocation and concentration",
+                "recommendation": "Consider spreading investments across multiple sectors to reduce risk. A well-diversified portfolio typically has no more than 30% in any single sector."
+            },
+            {
+                "title": "Monitor Performance Metrics",
+                "description": "Track individual stock performance regularly",
+                "recommendation": "Review stocks with negative returns and consider whether they still align with your investment strategy. Set stop-loss limits to protect against significant losses."
+            },
+            {
+                "title": "Rebalance Portfolio Quarterly",
+                "description": "Maintain target allocation percentages",
+                "recommendation": "Rebalance your portfolio every 3-6 months to maintain your desired risk level. Sell winners that have grown too large and add to positions that have decreased."
+            }
+        ]
+
     def _format_portfolio_json(self, context: Dict) -> str:
         """Format portfolio context as readable JSON"""
         import json

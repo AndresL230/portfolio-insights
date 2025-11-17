@@ -8,6 +8,8 @@ const InsightsPage = ({ holdings, sectorData }) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -17,6 +19,41 @@ const InsightsPage = ({ holdings, sectorData }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Fetch AI suggestions on component mount
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        setLoadingSuggestions(true);
+        const response = await api.getAISuggestions();
+        setSuggestions(response.suggestions || []);
+      } catch (err) {
+        console.error('Error fetching suggestions:', err);
+        // Use fallback suggestions
+        setSuggestions([
+          {
+            title: "Review Portfolio Diversification",
+            description: "Analyze your sector allocation and concentration",
+            recommendation: "Consider spreading investments across multiple sectors to reduce risk."
+          },
+          {
+            title: "Monitor Performance Metrics",
+            description: "Track individual stock performance regularly",
+            recommendation: "Review stocks with negative returns and evaluate their alignment with your strategy."
+          },
+          {
+            title: "Rebalance Portfolio Quarterly",
+            description: "Maintain target allocation percentages",
+            recommendation: "Rebalance every 3-6 months to maintain your desired risk level."
+          }
+        ]);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, []); // Empty dependency array - runs only on mount
 
   const handleAskQuestion = async (e) => {
     e.preventDefault();
@@ -262,40 +299,54 @@ const InsightsPage = ({ holdings, sectorData }) => {
         <h2>AI Suggestion Panel</h2>
         <p>Recommendations based on your holdings</p>
 
-        <div className="suggestions-grid">
-          <div className="suggestion-item">
-            <div className="suggestion-content">
-              <h4>Portfolio Diversification</h4>
-              <p>Analysis of sector concentration and allocation</p>
-            </div>
-            <div className="recommendation">
-              <strong>AI Analysis:</strong><br />
-              Coming soon - Click to get detailed insights
-            </div>
+        {loadingSuggestions ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
+            <p>Generating AI-powered suggestions...</p>
           </div>
-
-          <div className="suggestion-item">
-            <div className="suggestion-content">
-              <h4>Risk Assessment</h4>
-              <p>Evaluation of portfolio volatility and risk factors</p>
-            </div>
-            <div className="recommendation">
-              <strong>AI Analysis:</strong><br />
-              Coming soon - Click to get detailed insights
-            </div>
+        ) : (
+          <div className="suggestions-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {suggestions.map((suggestion, index) => (
+              <div
+                key={index}
+                className="suggestion-item"
+                style={{
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '1.5rem',
+                  alignItems: 'start',
+                  width: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 255, 255, 0.2)';
+                  e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                }}
+              >
+                <div className="suggestion-content" style={{ overflow: 'visible' }}>
+                  <h4>{suggestion.title}</h4>
+                  <p>{suggestion.description}</p>
+                </div>
+                <div className="recommendation" style={{
+                  paddingLeft: '1.5rem',
+                  borderLeft: '2px solid rgba(0, 255, 255, 0.2)',
+                  overflow: 'visible',
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word'
+                }}>
+                  <strong style={{ color: '#00FFFF' }}>AI Recommendation:</strong><br />
+                  {suggestion.recommendation}
+                </div>
+              </div>
+            ))}
           </div>
-
-          <div className="suggestion-item">
-            <div className="suggestion-content">
-              <h4>Performance Optimization</h4>
-              <p>Suggestions to improve overall returns</p>
-            </div>
-            <div className="recommendation">
-              <strong>AI Analysis:</strong><br />
-              Coming soon - Click to get detailed insights
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Performance Insights */}
