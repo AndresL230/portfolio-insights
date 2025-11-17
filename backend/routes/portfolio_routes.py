@@ -382,3 +382,72 @@ def get_ai_insights():
 
     except Exception as e:
         return jsonify({'error': f'Failed to generate insights: {str(e)}'}), 500
+
+
+@portfolio_bp.route('/ai-chat', methods=['POST'])
+def ai_chat():
+    """Chat with AI about the portfolio"""
+    try:
+        print("AI Chat endpoint called")
+
+        if not ai_service.is_configured():
+            error_msg = 'Gemini API key not configured. Please set GEMINI_API_KEY in your .env file'
+            print(f"AI service not configured: {error_msg}")
+            return jsonify({'error': error_msg}), 500
+
+        data = request.get_json()
+        question = data.get('question', '').strip()
+        print(f"Received question: {question}")
+
+        if not question:
+            return jsonify({'error': 'Question is required'}), 400
+
+        holdings = portfolio_model.load_holdings()
+        metrics = portfolio_model.calculate_metrics(holdings)
+        print(f"Portfolio loaded: {len(holdings)} holdings")
+
+        # Prepare context for AI
+        portfolio_context = {
+            'total_holdings': len(holdings),
+            'total_value': metrics['total_value'],
+            'total_gain_loss': metrics['total_gain_loss'],
+            'gain_loss_percentage': metrics['gain_loss_percentage'],
+            'holdings': []
+        }
+
+        for holding in holdings:
+            market_value = holding['shares'] * holding['current_price']
+            cost = holding['shares'] * holding['buy_price']
+            gain_loss = market_value - cost
+            return_pct = (gain_loss / cost * 100) if cost > 0 else 0
+
+            portfolio_context['holdings'].append({
+                'ticker': holding['ticker'],
+                'sector': holding['sector'],
+                'shares': holding['shares'],
+                'buy_price': holding['buy_price'],
+                'current_price': holding['current_price'],
+                'market_value': market_value,
+                'return_percentage': return_pct,
+                'purchase_date': holding['purchase_date']
+            })
+
+        print("Calling AI service...")
+        ai_response = ai_service.answer_question(portfolio_context, question)
+        print("AI response received successfully")
+
+        return jsonify({
+            'answer': ai_response,
+            'question': question
+        }), 200
+
+    except ValueError as e:
+        error_msg = str(e)
+        print(f"ValueError in ai_chat: {error_msg}")
+        return jsonify({'error': error_msg}), 500
+    except Exception as e:
+        error_msg = f'Failed to get answer: {str(e)}'
+        print(f"Exception in ai_chat: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': error_msg}), 500

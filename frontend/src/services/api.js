@@ -84,6 +84,10 @@ class ApiService {
   async getAIInsights() {
     return this.post('/ai-insights', {});
   }
+
+  async askAIQuestion(question) {
+    return this.post('/ai-chat', { question });
+  }
 }
 
 export default new ApiService();

@@ -1,68 +1,261 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { SectorPieChart, PerformanceBarChart } from '../components/Charts';
 import { calculateAverageHoldingTime, calculateTotalReturn } from '../utils/calculations';
 import api from '../services/api';
 
 const InsightsPage = ({ holdings, sectorData }) => {
-  const [aiInsights, setAiInsights] = useState(null);
-  const [loadingInsights, setLoadingInsights] = useState(false);
-  const [insightsError, setInsightsError] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const messagesEndRef = useRef(null);
 
-  const fetchAIInsights = async () => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleAskQuestion = async (e) => {
+    e.preventDefault();
+
+    const question = inputValue.trim();
+    if (!question) return;
+
+    // Add user message to chat
+    const userMessage = { type: 'user', content: question };
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+    setError('');
+
     try {
-      setLoadingInsights(true);
-      setInsightsError('');
-      const data = await api.getAIInsights();
-      setAiInsights(data.insights);
-    } catch (error) {
-      setInsightsError(error.message);
-      console.error('Error fetching AI insights:', error);
+      const response = await api.askAIQuestion(question);
+
+      // Add AI response to chat
+      const aiMessage = { type: 'ai', content: response.answer };
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (err) {
+      setError(err.message || 'Failed to get response from AI advisor');
+      console.error('Error asking AI:', err);
     } finally {
-      setLoadingInsights(false);
+      setIsLoading(false);
     }
+  };
+
+  const quickQuestions = [
+    "How is my portfolio performing?",
+    "What are my biggest risks?",
+    "Should I diversify more?",
+    "Which stocks have the best returns?",
+    "What sectors am I overweight in?"
+  ];
+
+  const handleQuickQuestion = (question) => {
+    setInputValue(question);
   };
 
   return (
     <div className="page-content">
       <div className="page-header">
-        <h1>Your Portfolio Advisor</h1>
-        <p>Get personalized insights and suggestions to improve your portfolio.</p>
-        <button
-          className="advisor-btn"
-          onClick={fetchAIInsights}
-          disabled={loadingInsights}
-        >
-          {loadingInsights ? 'Analyzing Portfolio...' : 'Ask the Advisor'}
-        </button>
+        <h1>AI Portfolio Advisor</h1>
+        <p>Ask questions about your portfolio and get personalized insights powered by AI.</p>
       </div>
 
-      {/* AI Insights Display */}
-      {aiInsights && (
-        <div className="ai-suggestions">
-          <h2>AI-Powered Portfolio Analysis</h2>
-          <div className="ai-insights-content">
-            <pre style={{
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'var(--font-primary)',
-              lineHeight: '1.6',
-              color: 'var(--color-text-secondary)',
-              background: 'rgba(20, 20, 30, 0.5)',
-              padding: '1.5rem',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              {aiInsights}
-            </pre>
-          </div>
-        </div>
-      )}
+      {/* AI Chat Interface */}
+      <div className="ai-chat-container" style={{
+        background: 'rgba(20, 20, 30, 0.5)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '12px',
+        padding: '1.5rem',
+        marginBottom: '2rem',
+        minHeight: '500px',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <h2 style={{ marginBottom: '1rem' }}>Chat with Your Advisor</h2>
 
-      {insightsError && (
-        <div className="error-banner" style={{ marginBottom: '2rem' }}>
-          <span>Warning: {insightsError}</span>
-          <button onClick={() => setInsightsError('')} className="error-close">×</button>
+        {/* Messages Area */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          marginBottom: '1rem',
+          padding: '1rem',
+          background: 'rgba(0, 0, 0, 0.2)',
+          borderRadius: '8px',
+          minHeight: '300px',
+          maxHeight: '400px'
+        }}>
+          {messages.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              color: 'var(--color-text-secondary)',
+              padding: '2rem'
+            }}>
+              <p style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
+                Hi! I'm your AI Portfolio Advisor.
+              </p>
+              <p>Ask me anything about your portfolio, and I'll provide insights based on your current holdings.</p>
+              <p style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
+                Try the quick questions below to get started!
+              </p>
+            </div>
+          ) : (
+            messages.map((message, index) => (
+              <div
+                key={index}
+                style={{
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start'
+                }}
+              >
+                <div style={{
+                  maxWidth: '80%',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '12px',
+                  background: message.type === 'user'
+                    ? 'linear-gradient(135deg, #00FFFF 0%, #00CCCC 100%)'
+                    : 'rgba(255, 255, 255, 0.05)',
+                  color: message.type === 'user' ? '#000' : 'var(--color-text-primary)',
+                  border: message.type === 'ai' ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+                }}>
+                  {message.type === 'ai' && (
+                    <div style={{
+                      fontWeight: 'bold',
+                      marginBottom: '0.5rem',
+                      color: '#00FFFF',
+                      fontSize: '0.9rem'
+                    }}>
+                      AI Advisor
+                    </div>
+                  )}
+                  <div style={{ whiteSpace: 'pre-line', lineHeight: '1.6' }}>
+                    {message.content}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+
+          {isLoading && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              marginBottom: '1rem'
+            }}>
+              <div style={{
+                padding: '0.75rem 1rem',
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <div style={{ color: '#00FFFF', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                  AI Advisor
+                </div>
+                <div>Thinking...</div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
-      )}
+
+        {/* Quick Questions */}
+        {messages.length === 0 && (
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>
+              Quick questions:
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '0.5rem',
+              flexWrap: 'wrap'
+            }}>
+              {quickQuestions.map((question, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleQuickQuestion(question)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: 'rgba(0, 255, 255, 0.1)',
+                    border: '1px solid rgba(0, 255, 255, 0.3)',
+                    borderRadius: '20px',
+                    color: '#00FFFF',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(0, 255, 255, 0.2)';
+                    e.target.style.borderColor = 'rgba(0, 255, 255, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(0, 255, 255, 0.1)';
+                    e.target.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                  }}
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Error Display */}
+        {error && (
+          <div style={{
+            padding: '0.75rem',
+            background: 'rgba(255, 68, 68, 0.1)',
+            border: '1px solid rgba(255, 68, 68, 0.3)',
+            borderRadius: '8px',
+            color: '#ff4444',
+            marginBottom: '1rem',
+            fontSize: '0.9rem'
+          }}>
+            {error}
+          </div>
+        )}
+
+        {/* Input Form */}
+        <form onSubmit={handleAskQuestion} style={{ display: 'flex', gap: '0.5rem' }}>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Ask a question about your portfolio..."
+            disabled={isLoading}
+            style={{
+              flex: 1,
+              padding: '0.75rem 1rem',
+              background: 'rgba(0, 0, 0, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              color: 'var(--color-text-primary)',
+              fontSize: '1rem'
+            }}
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !inputValue.trim()}
+            style={{
+              padding: '0.75rem 2rem',
+              background: 'linear-gradient(135deg, #00FFFF 0%, #00CCCC 100%)',
+              border: 'none',
+              borderRadius: '8px',
+              color: '#000',
+              fontWeight: 'bold',
+              cursor: isLoading || !inputValue.trim() ? 'not-allowed' : 'pointer',
+              opacity: isLoading || !inputValue.trim() ? 0.5 : 1,
+              fontSize: '1rem'
+            }}
+          >
+            {isLoading ? 'Asking...' : 'Ask'}
+          </button>
+        </form>
+      </div>
 
       {/* AI Suggestion Panel */}
       <div className="ai-suggestions">
@@ -72,22 +265,34 @@ const InsightsPage = ({ holdings, sectorData }) => {
         <div className="suggestions-grid">
           <div className="suggestion-item">
             <div className="suggestion-content">
-              <h4>Over-Concentration in Tech Sector</h4>
-              <p>Consider diversifying into other sectors</p>
+              <h4>Portfolio Diversification</h4>
+              <p>Analysis of sector concentration and allocation</p>
             </div>
             <div className="recommendation">
-              <strong>Recommendation:</strong><br />
-              Add stocks in Healthcare, Consumer Goods.
+              <strong>AI Analysis:</strong><br />
+              Coming soon - Click to get detailed insights
             </div>
           </div>
 
           <div className="suggestion-item">
             <div className="suggestion-content">
-              <h4>High Volatility</h4>
-              <p>Some stocks showing high risk due to market conditions</p>
+              <h4>Risk Assessment</h4>
+              <p>Evaluation of portfolio volatility and risk factors</p>
             </div>
             <div className="recommendation">
-              <strong>Consider balancing with stable assets.</strong>
+              <strong>AI Analysis:</strong><br />
+              Coming soon - Click to get detailed insights
+            </div>
+          </div>
+
+          <div className="suggestion-item">
+            <div className="suggestion-content">
+              <h4>Performance Optimization</h4>
+              <p>Suggestions to improve overall returns</p>
+            </div>
+            <div className="recommendation">
+              <strong>AI Analysis:</strong><br />
+              Coming soon - Click to get detailed insights
             </div>
           </div>
         </div>
@@ -117,35 +322,6 @@ const InsightsPage = ({ holdings, sectorData }) => {
         <div className="charts-row">
           <SectorPieChart data={sectorData} />
           <PerformanceBarChart data={holdings} />
-        </div>
-      </div>
-
-      {/* Risk Flags */}
-      <div className="risk-flags">
-        <h2>Risk Flags</h2>
-        <p>Key risks currently in your portfolio</p>
-
-        <div className="risk-items">
-          <div className="risk-item">
-            <div className="risk-content">
-              <h4>Over-Concentration</h4>
-              <p>Too much investment in one specific portfolio</p>
-            </div>
-          </div>
-
-          <div className="risk-item">
-            <div className="risk-content">
-              <h4>No Dividends</h4>
-              <p>Consider adding dividend-paying stocks</p>
-            </div>
-          </div>
-
-          <div className="risk-item">
-            <div className="risk-content">
-              <h4>Overtrading</h4>
-              <p>Excessive buy/trading activity</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
