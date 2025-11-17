@@ -10,9 +10,11 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, isLoading }) => {
     shares: '',
     purchase_date: ''
   });
+  const [formError, setFormError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
     try {
       await onAddStock({
         ticker: formData.ticker.trim().toUpperCase(),
@@ -23,6 +25,7 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, isLoading }) => {
       setShowAddForm(false);
     } catch (error) {
       console.error('Error adding stock:', error);
+      setFormError(error.message || 'Failed to add stock');
     }
   };
 
@@ -129,6 +132,17 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, isLoading }) => {
         <div className="modal-overlay" onClick={() => setShowAddForm(false)}>
           <div className="add-holding-modal" onClick={(e) => e.stopPropagation()}>
             <h2>Add New Holding</h2>
+            {formError && (
+              <div className="form-error" style={{
+                backgroundColor: '#ff4444',
+                color: 'white',
+                padding: '10px',
+                borderRadius: '5px',
+                marginBottom: '15px'
+              }}>
+                {formError}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="add-holding-form">
               <div className="form-grid">
                 <div className="form-group">
@@ -160,6 +174,7 @@ const HoldingsPage = ({ holdings, onAddStock, onDeleteHolding, isLoading }) => {
                     type="date"
                     value={formData.purchase_date}
                     onChange={(e) => setFormData({...formData, purchase_date: e.target.value})}
+                    max={new Date().toISOString().split('T')[0]}
                     required
                   />
                   <small>Price will be fetched automatically</small>

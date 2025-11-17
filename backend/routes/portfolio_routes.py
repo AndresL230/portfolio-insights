@@ -53,15 +53,22 @@ def add_holding():
     """Add a new stock holding"""
     try:
         data = request.get_json()
+        print(f"Received request to add holding: {data}")
 
-        # Validate input
-        required_fields = ['ticker', 'shares', 'purchase_date']
-        if not all(field in data for field in required_fields):
-            return jsonify({'error': 'Missing required fields: ticker, shares, purchase_date'}), 400
+        ticker = data.get('ticker', '').upper().strip()
+        shares = data.get('shares')
+        purchase_date = data.get('purchase_date')
+        manual_buy_price = data.get('buy_price')
 
-        ticker = data['ticker'].upper().strip()
-        shares = float(data['shares'])
-        purchase_date = data['purchase_date']
+        if not ticker or shares is None or not purchase_date:
+            error_msg = 'Missing required fields: ticker, shares, purchase_date'
+            print(f"Validation error: {error_msg}")
+            return jsonify({'error': error_msg}), 400
+
+        shares = float(shares)
+        print(f"Processing: {ticker}, {shares} shares, purchased on {purchase_date}")
+        if manual_buy_price:
+            print(f"Manual buy price provided: ${manual_buy_price}")
 
         # Validation
         if not ticker:
@@ -71,27 +78,36 @@ def add_holding():
         if not purchase_date:
             return jsonify({'error': 'Purchase date is required'}), 400
 
-        # Validate date format
         try:
-            datetime.datetime.strptime(purchase_date, '%Y-%m-%d')
+            parsed_date = datetime.datetime.strptime(purchase_date, '%Y-%m-%d')
+            if parsed_date.date() > datetime.datetime.now().date():
+                return jsonify({'error': 'Purchase date cannot be in the future'}), 400
         except ValueError:
             return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
 
-        # Check for duplicate ticker
         holdings = portfolio_model.load_holdings()
-        existing_tickers = [h['ticker'] for h in holdings]
+        existing_tickers = [h['ticker'].upper() for h in holdings]
         if ticker in existing_tickers:
-            return jsonify({'error': f'Stock {ticker} already exists in portfolio'}), 400
+            error_msg = f'Stock {ticker} already exists in portfolio'
+            print(f"Duplicate ticker error: {error_msg}")
+            return jsonify({'error': error_msg}), 400
 
-        # Fetch historical price for the purchase date
-        buy_price = stock_service.get_historical_price(ticker, purchase_date)
-        if buy_price is None:
-            return jsonify({'error': f'Could not fetch historical price for {ticker} on {purchase_date}. Please verify the ticker symbol and date.'}), 400
+        if manual_buy_price:
+            buy_price = float(manual_buy_price)
+            print(f"Using manual buy price: ${buy_price}")
+        else:
+            print(f"Fetching historical price for {ticker} on {purchase_date}...")
+            buy_price = stock_service.get_historical_price(ticker, purchase_date)
+            if buy_price is None:
+                error_msg = f'Could not fetch historical price for {ticker} on {purchase_date}. This could be due to: (1) Invalid ticker symbol, (2) No data available for that date, (3) Yahoo Finance rate limiting. Please wait 60 seconds and try again, or contact support.'
+                print(f"Price fetch error: {error_msg}")
+                return jsonify({
+                    'error': error_msg,
+                    'suggestion': f'You can look up the historical price for {ticker} on {purchase_date} manually and provide it in the request.'
+                }), 400
+            print(f"Successfully fetched buy price: ${buy_price}")
 
-        # Fetch current price
-        current_price = stock_service.get_real_time_price(ticker)
-        if current_price is None:
-            current_price = buy_price
+        current_price = buy_price
 
         # Create new holding
         new_holding = {
@@ -143,7 +159,7 @@ def refresh_prices():
         holdings = portfolio_model.load_holdings()
         updated_count = 0
 
-        for holding in holdings:
+        for i, holding in enumerate(holdings):
             ticker = holding['ticker']
             real_price = stock_service.get_real_time_price(ticker)
 
@@ -151,9 +167,12 @@ def refresh_prices():
                 holding['current_price'] = real_price
                 updated_count += 1
             else:
-                # Fallback to simulated price movement if API fails
                 variation = 0.95 + random.random() * 0.1
                 holding['current_price'] = round(holding['current_price'] * variation, 2)
+
+            if i < len(holdings) - 1:
+                import time
+                time.sleep(0.5)
 
         portfolio_model.save_holdings(holdings)
         metrics = portfolio_model.calculate_metrics(holdings)

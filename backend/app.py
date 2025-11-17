@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 from config import Config
 from models import Portfolio
-from services import StockService, AIService
+from services import UnifiedStockService, AIService
 from routes import portfolio_bp, init_routes
 
 
@@ -18,7 +18,7 @@ def create_app():
 
     # Initialize services
     portfolio = Portfolio(Config.CSV_FILE)
-    stock_service = StockService()
+    stock_service = UnifiedStockService(Config.ALPHA_VANTAGE_API_KEY)
     ai_service = AIService(Config.GEMINI_API_KEY)
 
     # Initialize routes with dependencies
@@ -45,6 +45,9 @@ if __name__ == '__main__':
     print("Starting Stock Portfolio Analyzer API...")
     print(f"API will be available at: http://localhost:{Config.PORT}")
     print(f"CSV storage location: {Config.CSV_FILE}")
+
+    av_status = 'Enabled' if Config.ALPHA_VANTAGE_API_KEY else 'Disabled - Using Yahoo Finance (set ALPHA_VANTAGE_API_KEY in .env)'
+    print(f"Alpha Vantage API: {av_status}")
 
     ai_status = 'Enabled' if Config.GEMINI_API_KEY else 'Disabled (set GEMINI_API_KEY in .env)'
     print(f"Gemini AI: {ai_status}")

@@ -23,8 +23,16 @@ class ApiService {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (jsonError) {
+        console.error('Failed to parse error response:', jsonError);
+      }
+      throw new Error(errorMessage);
     }
     return response.json();
   }

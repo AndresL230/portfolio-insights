@@ -16,6 +16,7 @@ class Config:
 
     # API Configuration
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+    ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
 
     # File paths
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
