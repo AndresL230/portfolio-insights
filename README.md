@@ -159,6 +159,7 @@ POST /api/holdings
 }
 ```
 
+
 **Response:**
 ```json
 {
@@ -277,22 +278,6 @@ The application is fully responsive with breakpoints for:
 - **Railway**: Modern application hosting platform
 - **Google Cloud Run**: Containerized application deployment
 - **AWS Elastic Beanstalk**: Managed application platform
-
-## **Future Enhancements**
-
-### **Near-term Improvements**
-- [ ] User authentication and personalized portfolios
-- [ ] Real-time stock price integration
-- [ ] Advanced charting with Chart.js or D3.js
-- [ ] Export functionality (PDF reports, CSV data)
-- [ ] Email notifications for portfolio alerts
-
-### **Advanced Features**
-- [ ] Machine learning-based recommendation engine
-- [ ] Portfolio backtesting capabilities
-- [ ] Social features for sharing insights
-- [ ] Mobile app development (React Native)
-- [ ] Integration with brokerage APIs for automatic sync
 
 ## **Troubleshooting**
 
