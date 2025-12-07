@@ -54,7 +54,7 @@
 }
 
 body {
-  font-family: var(--font-primary);
+  font-family: var(--font-mono);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-primary);
@@ -90,11 +90,13 @@ code {
 }
 
 .positive {
+  font-family: var(--font-mono);
   color: var(--color-positive);
   font-weight: 600;
 }
 
 .negative {
+  font-family: var(--font-mono);
   color: var(--color-negative);
   font-weight: 600;
 }

@@ -105,7 +105,7 @@ export const SectorPieChart = ({ data, title = "Sector Allocation" }) => {
       <text
         x={x}
         y={y}
-        fill="white"
+        fill="#666666"
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
         style={{ fontSize: '12px', fontWeight: 'bold' }}
@@ -189,7 +189,11 @@ export const HoldingsBarChart = ({ data, title = "Holdings by Value" }) => {
     <div className="chart-container">
       <h4>{title}</h4>
       <ResponsiveContainer width="100%" height={300}>
-        <RechartsBarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <RechartsBarChart
+          data={chartData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          barCategoryGap="20%"
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
           <XAxis
             dataKey="ticker"
@@ -204,11 +208,11 @@ export const HoldingsBarChart = ({ data, title = "Holdings by Value" }) => {
             tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip
+            cursor={false}
             contentStyle={{
               backgroundColor: 'rgba(10, 10, 10, 0.95)',
               border: '1px solid #00FF00',
               borderRadius: '8px',
-              color: '#FFFFFF',
               padding: '12px',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
             }}
@@ -227,6 +231,7 @@ export const HoldingsBarChart = ({ data, title = "Holdings by Value" }) => {
             fill="#00FF00"
             radius={[8, 8, 0, 0]}
             name="Total Value"
+            isAnimationActive={false}
           />
         </RechartsBarChart>
       </ResponsiveContainer>
