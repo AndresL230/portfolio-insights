@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import './InsightsPage.css';
 import { SectorPieChart, PerformanceBarChart } from '../components/Charts';
 import { calculateAverageHoldingTime, calculateTotalReturn } from '../utils/calculations';
 import api from '../services/api';

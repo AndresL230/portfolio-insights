@@ -1,4 +1,5 @@
 import React from 'react';
+import './Charts.css';
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -118,14 +119,14 @@ export const SectorPieChart = ({ data, title = "Sector Allocation" }) => {
     <div className="chart-container">
       <h4>{title}</h4>
       <ResponsiveContainer width="100%" height={300}>
-        <RechartsPieChart>
+        <RechartsPieChart margin={{ left: 10, right: 10 }}>
           <Pie
             data={data}
-            cx="50%"
+            cx="38%"
             cy="50%"
             labelLine={false}
             label={renderCustomLabel}
-            outerRadius={100}
+            outerRadius={110}
             fill="#8884d8"
             dataKey="percentage"
           >
@@ -150,8 +151,13 @@ export const SectorPieChart = ({ data, title = "Sector Allocation" }) => {
             itemStyle={{ color: '#FF00FF' }}
           />
           <Legend
-            verticalAlign="bottom"
-            height={36}
+            layout="vertical"
+            verticalAlign="middle"
+            align="right"
+            wrapperStyle={{
+              paddingLeft: '20px',
+              fontSize: '14px'
+            }}
             formatter={(value, entry) => `${entry.payload.sector}`}
           />
         </RechartsPieChart>

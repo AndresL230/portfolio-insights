@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './HoldingsPage.css';
 import { formatCurrency, formatPercentage } from '../utils/formatters';
 import { calculateHoldingMetrics } from '../utils/calculations';
 import { getCompanyName, getNotes } from '../utils/constants';

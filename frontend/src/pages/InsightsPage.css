@@ -1,0 +1,244 @@
+/* Page Headers */
+.page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.page-header h1 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.page-header p {
+  font-family: 'Inter', sans-serif;
+  color: #999;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+
+/* AI Suggestions */
+.ai-suggestions {
+  margin-bottom: 3rem;
+}
+
+.ai-suggestions h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.ai-suggestions p {
+  font-family: 'Inter', sans-serif;
+  color: #999;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+}
+
+.suggestions-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.suggestion-item {
+  background: rgba(20, 20, 30, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: start;
+  transition: all 0.3s ease;
+}
+
+.suggestion-item:hover {
+  background: rgba(20, 20, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.suggestion-content h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 0.5rem;
+}
+
+.suggestion-content p {
+  font-family: 'Inter', sans-serif;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 300;
+}
+
+.recommendation {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: #999;
+  text-align: right;
+  font-weight: 400;
+}
+
+/* Performance Insights */
+.performance-insights {
+  margin-bottom: 3rem;
+}
+
+.performance-insights h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.insight-item {
+  background: rgba(20, 20, 30, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.insight-item:hover {
+  background: rgba(20, 20, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.insight-label {
+  font-family: 'Inter', sans-serif;
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.insight-value {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.insight-change {
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  color: var(--color-positive);
+  font-weight: 500;
+}
+
+/* Diversification */
+.diversification-section {
+  margin-bottom: 3rem;
+}
+
+.diversification-section h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Risk Flags */
+.risk-flags {
+  margin-bottom: 3rem;
+}
+
+.risk-flags h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.risk-flags p {
+  font-family: 'Inter', sans-serif;
+  color: #999;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+}
+
+.risk-items {
+  display: grid;
+  gap: 1rem;
+}
+
+.risk-item {
+  background: rgba(20, 20, 30, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #f87171;
+  transition: all 0.3s ease;
+}
+
+.risk-item:hover {
+  background: rgba(20, 20, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.risk-content h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 0.25rem;
+}
+
+.risk-content p {
+  font-family: 'Inter', sans-serif;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .suggestion-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .recommendation {
+    text-align: center;
+  }
+}

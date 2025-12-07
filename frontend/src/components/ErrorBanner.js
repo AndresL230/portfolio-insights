@@ -1,4 +1,5 @@
 import React from 'react';
+import './ErrorBanner.css';
 
 const ErrorBanner = ({ error, onClose }) => {
   if (!error) return null;
